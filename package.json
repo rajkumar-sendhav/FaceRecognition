@@ -10,7 +10,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "face-api.js": "^0.20.0",
+    "canvas": "^2.11.2",
+    "face-api.js": "^0.22.2",
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-camera": "^4.2.1",

@@ -1,9 +1,9 @@
 import * as faceapi from 'face-api.js';
 
-const MODELS_URL = './assets/weights';
+const MODEL_URL = './assets/weights';
 
 export async function loadModels() {
-  await faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_URL);
-  await faceapi.nets.faceLandmark68Net.loadFromUri(MODELS_URL);
-  await faceapi.nets.faceRecognitionNet.loadFromUri(MODELS_URL);
+  await faceapi.loadSsdMobilenetv1Model(MODEL_URL);
+  await faceapi.loadFaceLandmarkModel(MODEL_URL);
+  await faceapi.loadFaceRecognitionModel(MODEL_URL);
 }

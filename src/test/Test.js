@@ -9,7 +9,7 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import styles from './CameraStyle';
+import styles from '../CameraStyle';
 import {RNCamera} from 'react-native-camera';
 import cameraFlip from './assets/icons/flip.png';
 import capturePlus from './assets/icons/plus.png';

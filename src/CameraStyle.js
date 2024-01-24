@@ -7,6 +7,36 @@ export default StyleSheet.create({
   cameraPreview: {
     flex: 1,
   },
+  bound: ({width, height, x, y}) => {
+    return {
+      position: 'absolute',
+      top: y,
+      left: x,
+      height,
+      width,
+      borderWidth: 5,
+      borderColor: 'red',
+      zIndex: 3000,
+    };
+  },
+  glasses: ({rightEyePosition, leftEyePosition, yawAngle, rollAngle}) => {
+    return {
+      position: 'absolute',
+      top: rightEyePosition.y - 60,
+      left: rightEyePosition.x - 100,
+      resizeMode: 'contain',
+      width: Math.abs(leftEyePosition.x - rightEyePosition.x) + 100,
+    };
+  },
+  nameText: {
+    color: 'green',
+    fontSize: 22,
+    textAlign: 'center',
+    marginTop: 15,
+    position: 'absolute',
+    top: '20%',
+    left: '10%',
+  },
   controlsContainer: {
     flex: 1,
     backgroundColor: 'transparent',

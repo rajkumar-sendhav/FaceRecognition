@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import styles from './CameraStyle';
 import {RNCamera} from 'react-native-camera';
-import cameraFlip from './assets/icons/flip.png';
-import capturePlus from './assets/icons/plus.png';
-import minus from './assets/icons/minus.png';
-import magnifyingGlass from './assets/icons/magnifying-glass.png';
+import cameraFlip from '../assets/icons/flip.png';
+import capturePlus from '../assets/icons/plus.png';
+import minus from '../assets/icons/minus.png';
+import magnifyingGlass from '../assets/icons/magnifying-glass.png';
 import BottomSheet from 'react-native-simple-bottom-sheet';
 import Modal from 'react-native-modal';
 

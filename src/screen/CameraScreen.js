@@ -8,6 +8,7 @@ import {
   Image,
   ScrollView,
   TextInput,
+  Alert,
 } from 'react-native';
 import styles from './CameraStyle';
 import {RNCamera} from 'react-native-camera';
@@ -17,8 +18,10 @@ import minus from '../assets/icons/minus.png';
 import magnifyingGlass from '../assets/icons/magnifying-glass.png';
 import BottomSheet from 'react-native-simple-bottom-sheet';
 import Modal from 'react-native-modal';
+import {connect} from 'react-redux';
+import {customerLogout} from '../reduxThunk/authAction';
 
-const CameraScreen = () => {
+const CameraScreen = ({customerLogout, details}) => {
   const [cameraType, setCameraType] = useState('back');
   const [modalVisible, setModalVisible] = useState(false);
   const [image, setImage] = useState('');
@@ -89,6 +92,25 @@ const CameraScreen = () => {
     } else {
       setBox(null);
     }
+  };
+
+  const handleLogout = () => {
+    // Show an alert when Log Out button is pressed
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => customerLogout(),
+        },
+      ],
+      {cancelable: false},
+    );
   };
 
   return (
@@ -165,6 +187,16 @@ const CameraScreen = () => {
                 style={styles.controlButtonIcon}
               />
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.controlButton,
+                {
+                  top: -50,
+                },
+              ]}
+              onPress={handleLogout}>
+              <Text style={styles.modalButtonText}>LogOut</Text>
+            </TouchableOpacity>
             <ScrollView onScrollEndDrag={onScrollEndDrag}>
               <View style={styles.bottomSheetContainer}>
                 <Text style={styles.title}>Frame</Text>
@@ -234,4 +266,16 @@ const CameraScreen = () => {
   );
 };
 
-export default CameraScreen;
+const mapStateToProps = state => {
+  return {
+    loading: state.loading,
+    details: state.login.details,
+    error: state.error,
+  };
+};
+
+const mapDispatchToProps = {
+  customerLogout,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(CameraScreen);

@@ -38,36 +38,31 @@ export const customerLogin = (userId, password) => {
     dispatch(customerLogin_Request());
 
     let params = {
-      userId: userId,
+      email: userId,
       password: password,
     };
 
     axios
-      .post('http://139.59.58.151:8000/userlogin', params, {
+      .post('http://64.227.162.41:5000/user/signin', params, {
         headers: {
           Accept: 'application/json',
         },
       })
       .then(async response => {
-        console.log(response.data);
-        const token = response.data.token;
+        // console.log(response.data);
+        const token = response.data.user.token;
+        // console.log('Token :', token);
         const details = response.data;
 
         if (token && details) {
-          // Check if the role is customer
-          if (response.data.role === 'kariger') {
-            dispatch({type: authToken, payload: token});
-            // Storing token to AsyncStorage
-            try {
-              await AsyncStorage.setItem('@AuthToken', token);
-            } catch (error) {
-              console.error('AsyncStorage error:', error);
-            }
-            dispatch(customerLogin_Success(details));
-          } else {
-            // Handle the case where the role is not customer
-            Alert.alert('Login Failed', 'Invalid role, please retry');
+          dispatch({type: authToken, payload: token});
+          // Storing token to AsyncStorage
+          try {
+            await AsyncStorage.setItem('@AuthToken', token);
+          } catch (error) {
+            console.error('AsyncStorage error:', error);
           }
+          dispatch(customerLogin_Success(details));
         } else {
           Alert.alert(
             'Login Failed',
@@ -91,19 +86,3 @@ export const customerLogout = () => dispatch => {
 
   AsyncStorage.removeItem('@AuthToken');
 };
-
-// http://139.59.58.151:8000/adminlogin
-// JSON Content
-// {
-//   "userId" : "ngjewel", "password" : "ng_info"
-// }
-// multipart/form-data
-// {
-//   "category" : "", "image" : "", "description" : "", "quantity" : "", "size" : "", "weight" : "", "tunch" :  ""
-// }
-
-// http://139.59.58.151:8000/userlogin
-// JSON Content
-// {
-//   "userId" : "user666", "password" : "user666"
-// }

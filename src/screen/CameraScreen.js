@@ -19,6 +19,7 @@ import BottomSheet from 'react-native-simple-bottom-sheet';
 import {connect} from 'react-redux';
 import {customerLogout} from '../reduxThunk/action/authAction';
 import {addCapturedImage} from '../reduxThunk/action/imgDetailsAction';
+import axios from 'axios';
 
 const CameraScreen = ({
   customerLogout,
@@ -49,13 +50,35 @@ const CameraScreen = ({
     }
   };
 
-  const handleModalOKPress = () => {
-    // Handle the OK button press
-    console.log('Name:', name);
-    console.log('Pan Number:', panNo);
-    setModalVisible(false);
-    // Dispatch Redux action to store captured image and name
-    addCapturedImage(image, name, panNo);
+  const handleModalOKPress = async () => {
+    try {
+      const panNumber = panNo;
+      const response = await axios.post(
+        'http://64.227.162.41:5000/user/verity-pan-no',
+        {
+          panNo: panNumber,
+        },
+      );
+
+      // Parse the JSON response
+      // console.log('Result: ', response.data);
+
+      if (response.data.status) {
+        Alert.alert('PAN card verification successful.');
+        console.log('Name:', name);
+        console.log('Pan Number:', panNo);
+        setModalVisible(false);
+        // Dispatch Redux action to store captured image, name and panNo
+        addCapturedImage(image, name, panNo);
+        setName('');
+        setPanNo('');
+      } else {
+        Alert.alert('PAN card not found. Verification unsuccessful.');
+      }
+    } catch (error) {
+      console.error('Error during PAN verification:', error.message);
+      Alert.alert('Error during PAN verification. Please try again.');
+    }
   };
 
   const handlerFace = ({faces}) => {

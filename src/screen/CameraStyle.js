@@ -16,6 +16,7 @@ export default StyleSheet.create({
       width,
       borderWidth: 5,
       borderColor: 'red',
+      borderRadius: 15,
       zIndex: 3000,
     };
   },

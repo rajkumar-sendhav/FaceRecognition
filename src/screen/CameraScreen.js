@@ -21,18 +21,14 @@ import {customerLogout} from '../reduxThunk/action/authAction';
 import {addCapturedImage} from '../reduxThunk/action/imgDetailsAction';
 import axios from 'axios';
 
-const CameraScreen = ({
-  customerLogout,
-  details,
-  addCapturedImage,
-  capturedImages,
-}) => {
+const CameraScreen = ({customerLogout, addCapturedImage, capturedImages}) => {
   const [cameraType, setCameraType] = useState('front');
   const [modalVisible, setModalVisible] = useState(false);
   const [image, setImage] = useState('');
   const [name, setName] = useState('');
   const [box, setBox] = useState(null);
   const [panNo, setPanNo] = useState('');
+  // console.log(capturedImages);
 
   const cameraRef = useRef(null);
   const bottomSheetRef = useRef(null);
@@ -206,7 +202,7 @@ const mapStateToProps = state => {
     loading: state.loading,
     details: state.login.details,
     error: state.error,
-    capturedImages: state.capturedImages,
+    capturedImages: state.imgDetails.capturedImages,
   };
 };
 

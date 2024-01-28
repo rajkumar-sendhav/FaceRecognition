@@ -3,7 +3,7 @@ import {StyleSheet} from 'react-native';
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#696969',
   },
   image: {
     top: '20%',
@@ -12,6 +12,7 @@ export default StyleSheet.create({
     alignSelf: 'center',
     width: 200,
     resizeMode: 'contain',
+    marginBottom: 50,
   },
 
   wrapper: {
@@ -41,7 +42,7 @@ export default StyleSheet.create({
     fontSize: 24,
     // marginTop: 12,
     marginBottom: 10,
-    color: '#fff',
+    color: '#000',
     textAlign: 'center',
   },
   inputView: {

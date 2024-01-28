@@ -11,24 +11,27 @@ import {
   Alert,
 } from 'react-native';
 import styles from './CameraStyle';
+import CameraControls from '../components/Camera/CameraControls';
+import CameraModal from '../components/Camera/CameraModal';
+import BottomSheetContent from '../components/BottomSheet/BottomSheetContent';
 import {RNCamera} from 'react-native-camera';
-import cameraFlip from '../assets/icons/flip.png';
-import capturePlus from '../assets/icons/plus.png';
-import minus from '../assets/icons/minus.png';
-import magnifyingGlass from '../assets/icons/magnifying-glass.png';
 import BottomSheet from 'react-native-simple-bottom-sheet';
-import Modal from 'react-native-modal';
 import {connect} from 'react-redux';
-import {customerLogout} from '../reduxThunk/authAction';
+import {customerLogout} from '../reduxThunk/action/authAction';
+import {addCapturedImage} from '../reduxThunk/action/imgDetailsAction';
 
-const CameraScreen = ({customerLogout, details}) => {
-  const [cameraType, setCameraType] = useState('back');
+const CameraScreen = ({
+  customerLogout,
+  details,
+  addCapturedImage,
+  capturedImages,
+}) => {
+  const [cameraType, setCameraType] = useState('front');
   const [modalVisible, setModalVisible] = useState(false);
   const [image, setImage] = useState('');
   const [name, setName] = useState('');
   const [box, setBox] = useState(null);
-  const [userName, setUserName] = useState('');
-  const [userImage, setUserImage] = useState('');
+  const [panNo, setPanNo] = useState('');
 
   const cameraRef = useRef(null);
   const bottomSheetRef = useRef(null);
@@ -42,8 +45,6 @@ const CameraScreen = ({customerLogout, details}) => {
       const photo = await cameraRef.current.takePictureAsync();
       console.log('Photo taken:', photo.uri);
       setImage(photo.uri);
-      setUserImage(photo.uri);
-      setUserName('');
       setModalVisible(true);
     }
   };
@@ -51,13 +52,15 @@ const CameraScreen = ({customerLogout, details}) => {
   const handleModalOKPress = () => {
     // Handle the OK button press
     console.log('Name:', name);
-    setUserName(name);
+    console.log('Pan Number:', panNo);
     setModalVisible(false);
+    // Dispatch Redux action to store captured image and name
+    addCapturedImage(image, name, panNo);
   };
 
   const handlerFace = ({faces}) => {
     if (faces[0]) {
-      if (userImage && faces[0].bounds.size.width > 0) {
+      if (image && faces[0].bounds.size.width > 0) {
         // Compare the detected face with the saved user's image
         // If they match, display a green box with the saved name
         setBox({
@@ -72,7 +75,7 @@ const CameraScreen = ({customerLogout, details}) => {
           rightEyePosition: faces[0].rightEyePosition,
           leftEyePosition: faces[0].leftEyePosition,
           bottomMounthPosition: faces[0].bottomMounthPosition,
-          name: userName,
+          name: name,
         });
       } else {
         setBox({
@@ -129,28 +132,10 @@ const CameraScreen = ({customerLogout, details}) => {
             width: 'auto',
           }}
         />
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            {
-              left: 20,
-              top: 20,
-            },
-          ]}
-          onPress={handleCameraTypePress}>
-          <Image source={cameraFlip} style={styles.controlButtonIcon} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            {
-              right: 20,
-              top: 20,
-            },
-          ]}
-          onPress={handleCapture}>
-          <Image source={capturePlus} style={styles.controlButtonIcon} />
-        </TouchableOpacity>
+        <CameraControls
+          handleCameraTypePress={handleCameraTypePress}
+          handleCapture={handleCapture}
+        />
       </RNCamera>
       {box && (
         <>
@@ -168,100 +153,27 @@ const CameraScreen = ({customerLogout, details}) => {
           />
         </>
       )}
+      <CameraModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        image={image}
+        name={name}
+        setName={setName}
+        panNo={panNo}
+        setPanNo={setPanNo}
+        handleModalOKPress={handleModalOKPress}
+      />
 
       <View style={{height: '28%', backgroundColor: '#000'}} />
 
       <BottomSheet ref={bottomSheetRef} isOpen={false}>
         {onScrollEndDrag => (
-          <>
-            <TouchableOpacity
-              style={[
-                styles.controlButton,
-                {
-                  right: 20,
-                  top: -80,
-                },
-              ]}>
-              <Image
-                source={magnifyingGlass}
-                style={styles.controlButtonIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.controlButton,
-                {
-                  top: -50,
-                },
-              ]}
-              onPress={handleLogout}>
-              <Text style={styles.modalButtonText}>LogOut</Text>
-            </TouchableOpacity>
-            <ScrollView onScrollEndDrag={onScrollEndDrag}>
-              <View style={styles.bottomSheetContainer}>
-                <Text style={styles.title}>Frame</Text>
-                <Text style={styles.title}>640x480</Text>
-              </View>
-              <View style={styles.bottomSheetContainer}>
-                <Text style={styles.title}>Crop</Text>
-                <Text style={styles.title}>240x320</Text>
-              </View>
-              <View style={styles.bottomSheetContainer}>
-                <Text style={styles.title}>Inference Time</Text>
-                <Text style={styles.title}>0ms</Text>
-              </View>
-              <View style={{borderBottomWidth: 1, borderColor: 'gray'}} />
-              <View style={styles.bottomSheetContainer}>
-                <Text style={styles.title}>Threads</Text>
-                <View
-                  style={{
-                    borderWidth: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    margin: 5,
-                    borderColor: 'gray',
-                  }}>
-                  <TouchableOpacity style={{padding: 5}}>
-                    <Image
-                      source={minus}
-                      style={[styles.controlButtonIcon, {tintColor: '#000'}]}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.title}> 1 </Text>
-                  <TouchableOpacity style={{padding: 5}}>
-                    <Image
-                      source={capturePlus}
-                      style={[styles.controlButtonIcon, {tintColor: '#000'}]}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={{borderBottomWidth: 1, borderColor: 'gray'}} />
-            </ScrollView>
-          </>
+          <BottomSheetContent
+            onScrollEndDrag={onScrollEndDrag}
+            handleLogout={handleLogout}
+          />
         )}
       </BottomSheet>
-
-      <Modal
-        isVisible={modalVisible}
-        style={{margin: 20}}
-        onBackdropPress={() => setModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Add Face</Text>
-          <Image source={{uri: image}} style={styles.modalImage} />
-          <TextInput
-            style={styles.modalInput}
-            placeholder="Enter name"
-            value={name}
-            onChangeText={text => setName(text)}
-          />
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={handleModalOKPress}>
-            <Text style={styles.modalButtonText}>OK</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -271,11 +183,13 @@ const mapStateToProps = state => {
     loading: state.loading,
     details: state.login.details,
     error: state.error,
+    capturedImages: state.capturedImages,
   };
 };
 
 const mapDispatchToProps = {
   customerLogout,
+  addCapturedImage,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(CameraScreen);

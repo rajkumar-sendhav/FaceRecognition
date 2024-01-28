@@ -9,23 +9,30 @@ import {
 } from 'react-native';
 import styles from './loginStyles';
 import {connect} from 'react-redux';
-import {AuthFunction, customerLogin} from '../reduxThunk/authAction';
+import {AuthFunction, customerLogin} from '../reduxThunk/action/authAction';
 // You can use your custom background image
-import BackgroundImage from '../assets/icons/facelogo.jpg';
+import BackgroundImage from '../assets/icons/rupio.png';
 
-const LoginScreen = ({getCustomerDetails, props, navigation}) => {
+const LoginScreen = ({getCustomerDetails}) => {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
 
   const handleAddDetail = () => {
-    if (password.length < 3) {
-      alert('Password must be at least 5 characters long');
+    // Email validation using a regular expression
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userId)) {
+      alert('Please enter a valid email address');
       return;
     }
 
+    // Password validation
+    if (password.length < 4) {
+      alert('Password must be at least 4 characters long');
+      return;
+    }
+
+    // If both email and password are valid, proceed with login
     getCustomerDetails(userId, password);
-    setUserId('');
-    setPassword('');
   };
 
   return (
@@ -33,9 +40,9 @@ const LoginScreen = ({getCustomerDetails, props, navigation}) => {
       <View style={styles.bottomView}>
         <View>
           <Image style={styles.image} source={BackgroundImage} />
-          <View style={{marginTop: 100}}>
+          {/* <View style={{marginTop: 50}}>
             <Text style={styles.loginText}>Face Recognition</Text>
-          </View>
+          </View> */}
         </View>
         <View style={styles.wrapper}>
           <View style={styles.inputView}>
@@ -45,8 +52,9 @@ const LoginScreen = ({getCustomerDetails, props, navigation}) => {
               autoCapitalize="none"
               placeholder="Enter Email"
               placeholderTextColor="gray"
-              maxLength={20}
-              textTansform="lowercase"
+              // maxLength={50}
+              textTransform="lowercase"
+              keyboardType="email-address"
               textContentType="emailAddress"
             />
           </View>
@@ -60,7 +68,6 @@ const LoginScreen = ({getCustomerDetails, props, navigation}) => {
               autoCapitalize="none"
               textContentType="password"
               maxLength={20}
-              textTansform="lowercase"
             />
           </View>
           <TouchableOpacity

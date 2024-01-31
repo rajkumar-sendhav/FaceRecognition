@@ -43,7 +43,7 @@ export const customerLogin = (userId, password) => {
     };
 
     axios
-      .post('http://64.227.162.41:5000/user/signin', params, {
+      .post('https://node.rupioo.com/user/signin', params, {
         headers: {
           Accept: 'application/json',
         },

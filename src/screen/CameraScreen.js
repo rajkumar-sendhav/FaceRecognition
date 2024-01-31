@@ -20,6 +20,8 @@ import {connect} from 'react-redux';
 import {customerLogout} from '../reduxThunk/action/authAction';
 import {addCapturedImage} from '../reduxThunk/action/imgDetailsAction';
 import axios from 'axios';
+import * as faceapi from 'face-api.js';
+import {myPhoto} from '../assets/IMG_20240131_195508.jpg';
 
 const CameraScreen = ({customerLogout, addCapturedImage, capturedImages}) => {
   const [cameraType, setCameraType] = useState('front');
@@ -28,6 +30,7 @@ const CameraScreen = ({customerLogout, addCapturedImage, capturedImages}) => {
   const [name, setName] = useState('');
   const [box, setBox] = useState(null);
   const [panNo, setPanNo] = useState('');
+  const [isFaceMatch, setIsFaceMatch] = useState(false);
   // console.log(capturedImages);
 
   const cameraRef = useRef(null);
@@ -50,7 +53,7 @@ const CameraScreen = ({customerLogout, addCapturedImage, capturedImages}) => {
     try {
       const panNumber = panNo;
       const response = await axios.post(
-        'http://64.227.162.41:5000/user/verity-pan-no',
+        'https://node.rupioo.com/user/verity-pan-no',
         {
           panNo: panNumber,
         },
@@ -77,8 +80,64 @@ const CameraScreen = ({customerLogout, addCapturedImage, capturedImages}) => {
     }
   };
 
-  const handlerFace = ({faces}) => {
+  useEffect(() => {
+    const loadFaceRecognitionModels = async () => {
+      await faceapi.nets.ssdMobilenetv1.loadFromUri('../assets/weights');
+      await faceapi.nets.faceLandmark68Net.loadFromUri('../assets/weights');
+      await faceapi.nets.faceRecognitionNet.loadFromUri('../assets/weights');
+    };
+
+    // Call the function to load models
+    loadFaceRecognitionModels();
+  }, []);
+
+  const checkFaceMatch = async (liveFaceImage, referenceImage) => {
+    // Load images
+    const liveFace = await faceapi.fetchImage(liveFaceImage);
+    const referenceFace = await faceapi.fetchImage(referenceImage);
+
+    // Detect face descriptors
+    const liveFaceDescriptor = await faceapi
+      .detectSingleFace(liveFace)
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    const referenceFaceDescriptor = await faceapi
+      .detectSingleFace(referenceFace)
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (liveFaceDescriptor && referenceFaceDescriptor) {
+      // Calculate the distance between face descriptors
+      const distance = faceapi.euclideanDistance(
+        liveFaceDescriptor.descriptor,
+        referenceFaceDescriptor.descriptor,
+      );
+
+      // Set a threshold for face matching
+      const threshold = 0.6;
+
+      // Return true if the distance is below the threshold
+      return distance < threshold;
+    }
+
+    // Return false if face descriptors are not available
+    return false;
+  };
+
+  const handlerFace = async ({faces}) => {
+    const referenceImage = myPhoto;
     if (faces[0]) {
+      const isMatch = await checkFaceMatch(faces[0].faceImage, referenceImage);
+
+      if (isMatch) {
+        console.log('Live face matches reference image!');
+      } else {
+        console.log('Live face does not match reference image.');
+      }
+      // Update the state to reflect the face match status
+      setIsFaceMatch(isMatch);
+
       if (image && faces[0].bounds.size.width > 0) {
         // Compare the detected face with the saved user's image
         // If they match, display a green box with the saved name
@@ -113,6 +172,7 @@ const CameraScreen = ({customerLogout, addCapturedImage, capturedImages}) => {
       }
     } else {
       setBox(null);
+      setIsFaceMatch(false);
     }
   };
 
@@ -168,6 +228,7 @@ const CameraScreen = ({customerLogout, addCapturedImage, capturedImages}) => {
                 y: box.boxs.y,
               }),
               box.name && {borderColor: 'green'},
+              isFaceMatch && {borderColor: 'green'},
             ]}
           />
         </>
